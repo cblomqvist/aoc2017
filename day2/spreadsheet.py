@@ -13,7 +13,7 @@ args = parser.parse_args()
 logging.info("LOG The file to read is: {}".format(args.filename))
 print("PRINT The file to read is: {}".format(args.filename))
 
-def calculate_line_checksum(line):
+def calculate_line_checksum_max_min_diff(line):
     first = True
     min = 0
     max = 0
@@ -30,11 +30,39 @@ def calculate_line_checksum(line):
                 max = number
     return max - min
 
-checksum = 0
-with open(args.filename) as file:
-    for line in file:
-        linesum = calculate_line_checksum(line.rstrip('\n'))
-        print("Linesum of '{}' is {}".format(line.rstrip('\n'), linesum))
-        checksum += linesum
+def calculate_file_checksum_max_min_diff_of_file(filename):
+    checksum = 0
+    with open(filename) as file:
+        for line in file:
+            linesum = calculate_line_checksum_max_min_diff(line.rstrip('\n'))
+            # print("Linesum of '{}' is {}".format(line.rstrip('\n'), linesum))
+            checksum += linesum
 
-print("Checksum of {} is {}".format(args.filename, checksum))
+    print("File max-min Checksum of {} is {}".format(filename, checksum))
+
+calculate_file_checksum_max_min_diff_of_file(args.filename)
+
+def calculate_line_checksum_even_division(line):
+    cells = line.split()
+    # we only need to find the first case where division succeeds
+    for i in range(len(cells)):
+        first = int(cells[i])
+        the_rest = cells[i+1:len(cells)]
+        for j in range(len(the_rest)):
+            second = int(the_rest[j])
+            if (first % second == 0):
+                return first / second
+            if (second % first == 0):
+                return second / first
+            
+def calculate_file_even_division_of_file(filename):
+    checksum = 0
+    with open(filename) as file:
+        for line in file:
+            linesum = calculate_line_checksum_even_division(line.rstrip('\n'))
+            # print("Linesum of '{}' is {}".format(line.rstrip('\n'), linesum))
+            checksum += linesum
+
+    print("File max-min Checksum of {} is {}".format(filename, checksum))
+
+calculate_file_even_division_of_file(args.filename)
