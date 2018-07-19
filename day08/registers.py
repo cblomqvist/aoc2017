@@ -56,8 +56,17 @@ def get_registry_value(key):
     value = int(registrys.get(key, 0))
     return value
 
+# Max value ever held in any registry
+maximum_value_ever = None
+maximum_value_key = None
+
 def set_registry_value(key, value):
+    global maximum_value_ever
+    global maximum_value_key
     registrys[key] = value
+    if maximum_value_ever == None or maximum_value_ever < value:
+        maximum_value_ever = value
+        maximum_value_key = key
 
 def get_left_condition(instruction):
     key = instruction.strip().split(" ")[INDEX_LEFT_CONDITION]
@@ -156,3 +165,4 @@ for key in registrys:
         regkey = key
     
 print("The largest registry value I found was {} in registry '{}'".format(largest, regkey))
+print("The largest registry value ever was {} in registry '{}'".format(maximum_value_ever, maximum_value_key))
