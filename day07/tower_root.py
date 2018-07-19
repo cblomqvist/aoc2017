@@ -37,7 +37,7 @@ log.info("The file to read is: {}".format(args.filename))
 class Node:
     def __init__(self, key, weight):
         self.key = key
-        self.weight = weight
+        self.weight = int(weight)
         self.children = {}
         self.parent = None
 
@@ -115,4 +115,67 @@ rootlist = find_root(nodes)
 print("Root node list (should be one element): {}".format(rootlist))
 
 rootnode = nodes[rootlist[0]]
-print("Root node representation: {}".format(rootnode))
+print("PART 1 :: Root node representation: {}".format(rootnode))
+
+################################################################################
+############# Additions for PART 2 begins
+################################################################################
+
+log.info("Looking for unbalanced sub tree...")
+
+# Calculate weight of a branch
+def calculate_branch_weight(node):
+    if node.children == {}:
+        log.info("Weigth of {} is {}".format(node.key, node.weight))
+        return node.weight
+    weight = node.weight
+    for child in node.children:
+        weight += calculate_branch_weight(node.children[child])
+    return weight
+
+def find_unbalance(node):
+    # Counts how many nodes have the same weight
+    log.info("Inspecting children of {}...".format(node))
+    log.info("node is of type {}".format(type(node)))
+    log.info("Inspecting {} children...".format(len(node.children)))
+    children_by_weight = {}
+    for branch in node.children:
+        current_branch = node.children[branch]
+        weight = calculate_branch_weight(current_branch)
+        if weight in children_by_weight:
+            children_by_weight[weight].append(current_branch)
+        else:
+            children_by_weight[weight] = [current_branch]
+    
+    oddone_list = [x for x in children_by_weight if len(children_by_weight[x]) == 1]
+    if len(oddone_list) == 0:
+        # We have balance here
+        return None, 0
+ 
+    # Unbalance detected
+    odd_weight = oddone_list[0]
+    # This list has ony one item: the odd child
+    odd_child = children_by_weight[odd_weight][0]
+    majority_weight = [x for x in children_by_weight if len(children_by_weight[x]) > 1][0]
+    diff = majority_weight - odd_weight
+    log.info("Unbalanced weight of '{}' is '{}', majority_weight: {}, diff: {} from branch: {}".format(
+        node.key, odd_weight, majority_weight, diff, odd_child))
+
+    # Look for unbalance among its children
+    child_unbalance, child_diff = find_unbalance(odd_child)
+    if child_unbalance != None:
+        # Unbalance is higher up in tower, among children
+        return child_unbalance, child_diff
+    # No further unbalance detected so this is the unbalanced node    
+    return odd_child, diff
+
+
+unbalanced, diff = find_unbalance(rootnode)
+print(unbalanced)
+print(diff)
+if unbalanced == None:
+    print("The tree is balanced!")
+else:
+    expected_weight = unbalanced.weight + diff
+    print("Correcting node '{}' from {} to {} would fix the imbalance".format(
+        unbalanced.key, unbalanced.weight, expected_weight))
