@@ -49,7 +49,7 @@ class CubeCoordinate:
         }
 
     def __str__(self):
-        return "{}:{}:{}".format(self.x, self.y, self.z)
+        return "{}:{}:{}, distance: {}".format(self.x, self.y, self.z, self.distance())
     
     def __repr__(self):
         return self.__str__()
@@ -82,17 +82,33 @@ class CubeCoordinate:
         func = self.directions[direction]
         func()
 
+    # From looking at the models on the link I have deduced that the distance
+    # from the center (starting point) is the sum of all positive coordinates
+    # of a position. I.e. that is the minimum number of steps to get back to 
+    # the starting point
+    def distance(self):
+        distance = 0
+        if self.x > 0:
+            distance += self.x
+        if self.y > 0:
+            distance += self.y
+        if self.z > 0:
+            distance += self.z
+        return distance        
+
 with open(filename) as file:
     linecounter = 0
     for line in file:
         position = CubeCoordinate()
-
         if 'test' in filename:
-            # The test file is split up to have test data followed by '#' and then a descrition of the test data
+            log.info("Processing TEST data...")
+            # The test file is split up to have test data followed by '#' and then a description of the test data
             print("Line {}: {}".format(linecounter, line.strip().split("#")[1].strip()))
+            moves = line.split("#")[0].strip().split(',')
+        else:
+            log.info("Processing PRODUCTION data...")
             moves = line.strip().split(',')
-            for direction in moves:
-                position.move(direction)
+        for direction in moves:
+            position.move(direction)
+        print("Coordinates: {}".format(position))
         linecounter += 1
-
-
