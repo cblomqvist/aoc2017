@@ -47,9 +47,11 @@ class CubeCoordinate:
             "ne": self.ne,
             "sw": self.sw
         }
+        self.maxdistance = 0
 
     def __str__(self):
-        return "{}:{}:{}, distance: {}".format(self.x, self.y, self.z, self.distance())
+        return "{}:{}:{}, distance: {}, max: {}".format(
+            self.x, self.y, self.z, self.distance(), self.maxdistance)
     
     def __repr__(self):
         return self.__str__()
@@ -81,6 +83,8 @@ class CubeCoordinate:
     def move(self, direction):
         func = self.directions[direction]
         func()
+        if self.distance() > self.maxdistance:
+            self.maxdistance = self.distance()
 
     # From looking at the models on the link I have deduced that the distance
     # from the center (starting point) is the sum of all positive coordinates
