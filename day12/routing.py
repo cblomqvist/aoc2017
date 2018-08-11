@@ -37,6 +37,7 @@ class Node:
     def __init__(self, id, connections):
         self.id = id
         self.connections = connections
+        self.group = None
     
     def __str__(self):
         return "{} - {}".format(self.id, self.connections)
@@ -58,17 +59,28 @@ def process_input(input):
         nodes[id] = node
     return nodes
 
-def probe(currentnode, all_nodes, visited):
+def probe(currentnode, all_nodes, visited, group_id):
+    currentnode.group = group_id
     for connection_id in currentnode.connections:
         if connection_id not in visited:
             visited.append(connection_id)
-            probe(all_nodes[connection_id], all_nodes, visited)
+            next_node = all_nodes[connection_id]
+            probe(next_node, all_nodes, visited, group_id)
 
-target_id = '0'
 with open(filename) as file:
+    log.info("Processing {}...".format(filename))
     nodes = process_input(file)
-    target = nodes[target_id]
-    visited = []
-    probe(target, nodes, visited)
-    connected = target.connections
-    print("There are {} nodes connected to node {}, direct or indirect".format(len(visited), target_id))
+    log.info("The file {} contained {} nodes.".format(filename, len(nodes)))
+    group_id = 0
+    for target_id in nodes:
+        target = nodes[target_id]
+        if target.group is None:
+            group_id += 1
+            log.info("Node {} is starting a new group: {}".format(target_id, group_id))
+            visited = []
+            probe(target, nodes, visited, group_id)
+            connected = target.connections
+            print("There are {} nodes connected to node {}, direct or indirect".format(len(visited), target_id))
+    print("There are {} groups in total!".format(group_id))
+
+
